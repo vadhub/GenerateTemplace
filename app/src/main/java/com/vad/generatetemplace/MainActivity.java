@@ -1,8 +1,10 @@
 package com.vad.generatetemplace;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.TextView;
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private File path;
     private File file;
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,10 +36,11 @@ public class MainActivity extends AppCompatActivity {
         versionCode = (TextView) findViewById(R.id.versioncode);
         xmlFile = (TextView) findViewById(R.id.xmlfile);
 
-        path = getExternalFilesDir(Environment.getExternalStorageState());
+        path = getExternalFilesDir(String.valueOf(Environment.isExternalStorageLegacy()));
         file = new File(path,"app-debug.apk");
+        returnCharacterAPK(file.getAbsolutePath());
 
-        label.setText(file.toString());
+        label.setText(file.getAbsolutePath());
 
 
     }
