@@ -4,17 +4,21 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.TextView;
 
-import net.dongliu.apk.parser.ApkFile;
-import net.dongliu.apk.parser.bean.ApkMeta;
-import net.dongliu.apk.parser.bean.UseFeature;
+
+import com.jaredrummler.apkparser.ApkParser;
+import com.jaredrummler.apkparser.model.ApkMeta;
+import com.jaredrummler.apkparser.model.UseFeature;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,40 +40,47 @@ public class MainActivity extends AppCompatActivity {
         versionCode = (TextView) findViewById(R.id.versioncode);
         xmlFile = (TextView) findViewById(R.id.xmlfile);
 
-        path = getExternalFilesDir(String.valueOf(Environment.isExternalStorageLegacy()));
-        file = new File(path,"app-debug.apk");
-        returnCharacterAPK(file.getAbsolutePath());
-
-        label.setText(file.getAbsolutePath());
+        returnCharacterAPK("com.vad.templaceweb");
 
 
     }
 
     @SuppressLint("SetTextI18n")
-    private void returnCharacterAPK(String filePath){
-        try (ApkFile apkFile = new ApkFile(new File(filePath))) {
-            ApkMeta apkMeta = null;
-            apkMeta = apkFile.getApkMeta();
-            //System.out.println(apkMeta.getLabel());
-            packageName.setText(apkMeta.getPackageName());
-            versionCode.setText(apkMeta.getVersionCode().toString());
+    private void returnCharacterAPK(String packagename){
+        PackageManager pm = getPackageManager();
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = pm.getApplicationInfo(packagename, 0);
+            ApkParser apkParser = ApkParser.create(appInfo);
+            ApkMeta meta = apkParser.getApkMeta();
+            String packageName = meta.packageName;
+            long versionCode = meta.versionCode;
 
-//            for (UseFeature feature : apkMeta.getUsesFeatures()) {
-//                System.out.println(feature.getName());
-//            }
+            label.setText(packageName+" "+versionCode);
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
-    private void returnXML(String filePath){
-        try (ApkFile apkFile = new ApkFile(new File(filePath))) {
-            String manifestXml = apkFile.getManifestXml();
-            String xml = apkFile.transBinaryXml("res/menu/main.xml");
-
-            xmlFile.setText(xml);
+    private void returnXML(String packagename){
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = getPackageManager().getApplicationInfo(packagename, 0);
+            ApkParser apkParser = ApkParser.create(appInfo);
+            String readableAndroidManifest = apkParser.getManifestXml();
+            String xml = apkParser.transBinaryXml("res/layout/activity_main.xml");
+            packageName.setText(xml);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 }
