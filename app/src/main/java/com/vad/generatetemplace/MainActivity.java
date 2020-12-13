@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         xmlFile = (TextView) findViewById(R.id.xmlfile);
 
         returnCharacterAPK("com.vad.templaceweb");
+        returnXML("com.vad.templaceweb");
 
 
     }
